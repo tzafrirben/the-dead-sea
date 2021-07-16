@@ -30,7 +30,7 @@ jobs:
         with:
           author_name: Tzafrir Ben Ami
           author_email: tzafrirben@gmail.com
-          message: "update latest tweet date ${{ steps.date.outputs.date }}"
+          message: "commit latest tweet date ${{ steps.date.outputs.date }}"
           add: "last_tweet.txt"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
