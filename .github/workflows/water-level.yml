@@ -1,0 +1,33 @@
+name: Water level history
+on:
+  schedule:
+    - cron: '00 14 * * *'
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    name: update water level
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download measurements
+        uses: tzafrirben/babashka-docker-action@v1.1
+        id: download_surveys
+        env:
+          DATA_GOV_RESOURCE: ${{ secrets.DATA_GOV_RESOURCE }}
+        with:
+          bb_src: 'update_surveys.bb.clj'
+          bb_args: 'docs/surveys.json'
+      - name: Print download latest surveys result
+        run: echo "babashka shell output ${{ steps.download_surveys.outputs.bb_out }}"
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Commit latest surveys changes
+        uses: EndBug/add-and-commit@v4
+        with:
+          author_name: Tzafrir Ben Ami
+          author_email: tzafrirben@gmail.com
+          message: "update surveys history daily action ${{ steps.date.outputs.date }}"
+          add: "docs/surveys.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
