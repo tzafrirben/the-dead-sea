@@ -1,0 +1,38 @@
+name: Tweet water level
+on:
+  schedule:
+    - cron: '30 14 * * *'
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build twitter message
+        uses: tzafrirben/babashka-docker-action@v1.1
+        id: twitter_message
+        with:
+          bb_src: 'prepare_tweet.bb.clj'
+          bb_args: 'docs/surveys.json last_tweet.txt'
+      - name: Post tweet
+        uses: ethomson/send-tweet-action@v1
+        if: steps.twitter_message.outputs.bb_out != ''
+        with:
+          status: "${{steps.twitter_message.outputs.bb_out}}"
+          consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Commit latest tweet date
+        uses: EndBug/add-and-commit@v4
+        if: steps.twitter_message.outputs.bb_out != ''
+        with:
+          author_name: Tzafrir Ben Ami
+          author_email: tzafrirben@gmail.com
+          message: "commit latest tweet date ${{ steps.date.outputs.date }}"
+          add: "last_tweet.txt"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
