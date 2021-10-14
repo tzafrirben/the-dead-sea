@@ -7,7 +7,7 @@
   (:import [java.time LocalDate]
            [java.time.format DateTimeFormatter]))
 
-(def in-date-pattern (DateTimeFormatter/ofPattern "yyyy-MM-dd'T'hh:mm:ss"))
+(def in-date-pattern (DateTimeFormatter/ofPattern "dd/MM/yyyy"))
 (def out-date-pattern (DateTimeFormatter/ofPattern "yyyy-MM-dd"))
 (def data-gov-env (System/getenv "DATA_GOV_RESOURCE"))
 (def data-gov-url "https://data.gov.il/api/3/action/datastore_search")
