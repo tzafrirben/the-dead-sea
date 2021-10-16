@@ -1,6 +1,7 @@
 #!/usr/bin/env bb
 (ns update-surveys
   (:require
+   [clojure.edn :as edn]
    [clojure.java.shell :as shell]
    [clojure.string :as string]
    [cheshire.core :as json])
@@ -39,7 +40,11 @@
           (let [api-records (->> (:result response)
                                  (:records)
                                  (map #(dissoc % :_id))
-                                 (map format-date))
+                                 (map format-date)
+                                 (map (fn [{:keys [level] :as record}]
+                                        (if (string? level)
+                                          (assoc record :level (edn/read-string level))
+                                          record))))
                 new-records (remove-existing-records history api-records)]
             (if (seq new-records)
               (let [updated-history (sort #(let [d1 (LocalDate/parse (:date %1) out-date-pattern)
